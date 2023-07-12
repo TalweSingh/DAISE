@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 import pandas as pd
+import numpy as np
 
 
 @dataclass
@@ -129,6 +130,9 @@ def create_forecast_df(
 
     # the forecasts are given in one hour windows, so we need to resample to 15 min
     fc = fc.loc[fc.index.repeat(4)].reset_index(drop=True)
+    repeat_array = np.tile(np.arange(4), len(fc) // 4)
+    fc['valid_time'] = fc['valid_time'] + pd.to_timedelta(repeat_array * 15, unit='m') - pd.to_timedelta(15, unit='m')
+
     # remove first row, so the resampling is applied in a way that one forecasted hour
     # covers the timeframe from xx:45 to xx:30
     fc.drop([0], inplace=True)
